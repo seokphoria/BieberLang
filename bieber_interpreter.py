@@ -12,6 +12,8 @@ class Bieber:
         self.execute_program(model)
 
     def execute_program(self, program):
+        self.methods = {method.name: method for method in program.methods}
+
         for stmt in program.statements:
             self.execute_statement(stmt)
 
@@ -49,6 +51,11 @@ class Bieber:
         elif cls_name == "BabyExpr":
             self.eval_expr(stmt.expr)
 
+        elif cls_name == "BabyCall":
+            method = stmt.name
+            for inner_stmt in method.statements:
+                self.execute_statement(inner_stmt)
+
         else:
             raise Exception(f"Unknown statement type: {cls_name}")
 
@@ -69,35 +76,58 @@ class Bieber:
                 self.execute_statement(inner_stmt)
 
     def eval_condition(self, condition):
-        left = self.eval_expr(condition.left)
-        right = self.eval_expr(condition.right)
+        cls_name = condition.__class__.__name__
 
-        if condition.op == "==":
-            return left == right
-        elif condition.op == "!=":
-            return left != right
-        elif condition.op == "<":
-            return left < right
-        elif condition.op == ">":
-            return left > right
+        if cls_name == "Condition":
+            if hasattr(condition, "value") and condition.value:
+                return self.eval_condition(condition.value)
 
-        raise Exception(f"Unknown condition operator: {condition.op}")
+        if cls_name == "BoolCondition":
+            return bool(self.eval_expr(condition.value))
+
+        if cls_name == "CompareCondition":
+            left = self.eval_expr(condition.left)
+            right = self.eval_expr(condition.right)
+
+            if condition.op == "==":
+                return left == right
+            elif condition.op == "!=":
+                return left != right
+            elif condition.op == "<":
+                return left < right
+            elif condition.op == ">":
+                return left > right
+            elif condition.op == "<=":
+                return left <= right
+            elif condition.op == ">=":
+                return left >= right
+
+        raise Exception(f"Unknown condition: {condition}")
 
     def eval_expr(self, expr):
         cls_name = expr.__class__.__name__
 
-        if cls_name == "int":
+        if isinstance(expr, bool):
             return expr
 
         if isinstance(expr, int):
             return expr
 
         if isinstance(expr, str):
-            return self.variables.get(expr, expr)
+            if expr == "true":
+                return True
+            if expr == "false":
+                return False
+            if expr in self.variables:
+                return self.variables[expr]
+            raise Exception(f"Undefined variable: {expr}")
 
         if cls_name == "Atom":
-            if hasattr(expr, "value"):
+            if hasattr(expr, "value") and expr.value is not None:
                 return self.eval_expr(expr.value)
+
+            if hasattr(expr, "expr") and expr.expr is not None:
+                return self.eval_expr(expr.expr)
 
         if cls_name == "AddExpr":
             result = self.eval_expr(expr.left)
@@ -154,4 +184,4 @@ class Bieber:
 
 if __name__ == "__main__":
     interpreter = Bieber("bieber_grammar.tx")
-    interpreter.run("fizzbuzz.jb")
+    interpreter.run("programs/multiplication.jb")
