@@ -4,8 +4,19 @@ Program:
 
 BabyProgram:
   'Song:' songName='Baby'
+    methods*=BabyMethod
     statements*=BabyStatement
   "I thought you'd always be mine, mine"
+;
+
+BabyMethod:
+  'Track' name=ID
+    statements*=BabyStatement
+  'End track'
+;
+
+BabyCall:
+  'Play' name=[BabyMethod] '~'
 ;
 
 OtherSongProgram:
@@ -15,11 +26,11 @@ OtherSongProgram:
 ;
 
 BabyStatement:
-  BabyAssignment | BabyPrint | BabyIncrement | BabyDecrement | BabyLoop | BabyIf | BabyExpr
+  BabyAssignment | BabyPrint | BabyIncrement | BabyDecrement | BabyLoop | BabyIf | BabyExpr | BabyMethod | BabyCall
 ;
 
 BabyAssignment:
-  'Oh, woah,' variable=ID 'is' value=Expr
+  'Oh, woah,' variable=ID 'is' value=Expr '~'
 ;
 
 BabyPrint:
@@ -31,11 +42,11 @@ Printable:
 ;
 
 BabyIncrement:
-  'And' variable=ID 'was like,' babyCount=BabyCount ', ohh'
+  'And' variable=ID 'was like,' babyCount=BabyCount 'ohh'
 ;
 
 BabyCount:
-  'Baby' | 'baby' | 'Baby,' babyCount=BabyCount | 'baby,' babyCount=BabyCount
+  'baby,' babyCount=BabyCount | 'baby,'
 ;
 
 BabyDecrement:
@@ -71,11 +82,19 @@ BabyElse:
 ;
 
 Condition:
+    CompareCondition | BoolCondition
+;
+
+BoolCondition:
+    value=Expr
+;
+
+CompareCondition:
     left=Expr op=ConditionOp right=Expr
 ;
 
 ConditionOp:
-  '==' | '!=' | '<' | '>' | '<=' | '>=' 
+  '!=' |'==' | '<=' | '>=' | '<' | '>'
 ;
 
 BabyExpr:
@@ -102,8 +121,12 @@ MulOp:
   '*' | '/' | '%'
 ;
 
+Bool:
+  'true' | 'false'
+;
+
 Atom:
-  INT | ID | '(' Expr ')'
+  '(' expr=Expr ')' | value=INT | value=Bool | value=ID
 ;
 
 OtherSongStatement:
