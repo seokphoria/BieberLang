@@ -1,0 +1,119 @@
+Program:
+    BabyProgram | OtherSongProgram
+;
+
+BabyProgram:
+  'Song:' songName='Baby'
+    statements*=BabyStatement
+  "I thought you'd always be mine, mine"
+;
+
+OtherSongProgram:
+  'Song:' songName='Other Song'
+    statements*=OtherSongStatement
+  'end'
+;
+
+BabyStatement:
+  BabyAssignment | BabyPrint | BabyIncrement | BabyDecrement | BabyLoop | BabyIf | BabyExpr
+;
+
+BabyAssignment:
+  'Oh, woah,' variable=ID 'is' value=Expr
+;
+
+BabyPrint:
+  'Just shout' value=Printable ", and I'll be there"
+;
+
+Printable:
+  STRING | Expr
+;
+
+BabyIncrement:
+  'And' variable=ID 'was like,' babyCount=BabyCount ', ohh'
+;
+
+BabyCount:
+  'Baby' | 'baby' | 'Baby,' babyCount=BabyCount | 'baby,' babyCount=BabyCount
+;
+
+BabyDecrement:
+  'Im going' downCount=DownCount 
+;
+
+DownCount:
+  'down' | 'down,' downCount=DownCount
+;
+
+BabyLoop:
+  'When' condition=Condition ', I had my first love'
+    statements*=BabyStatement
+  'And now my heart is breaking, but I just keep on saying'
+;
+
+BabyIf:
+  'Are we' condition=Condition '?'
+    statements*=BabyStatement
+  (elifs+=BabyElif)*
+  (else_=BabyElse)?
+  'My first love broke my heart for the first time'
+;
+
+BabyElif:
+  "Girl quit playin, we're" condition=Condition ', what are you sayin?'
+    statements*=BabyStatement
+;
+
+BabyElse:
+  'Said, "Theres another," and looked right in my eyes'
+    statements*=BabyStatement
+;
+
+Condition:
+    left=Expr op=ConditionOp right=Expr
+;
+
+ConditionOp:
+  '==' | '!=' | '<' | '>' | '<=' | '>=' 
+;
+
+BabyExpr:
+  "Oh, for you, I would've done" expr=Expr
+;
+
+Expr:
+  AddExpr
+;
+
+AddExpr:
+  left=MulExpr (ops+=AddOp rights+=MulExpr)*
+;
+
+AddOp:
+  '+' | '-'
+;
+
+MulExpr:
+  left=Atom (ops+=MulOp rights+=Atom)*
+;
+
+MulOp:
+  '*' | '/' | '%'
+;
+
+Atom:
+  INT | ID | '(' Expr ')'
+;
+
+OtherSongStatement:
+  OtherPrint 
+;
+
+OtherPrint:
+  'bleh'
+;
+
+Comment:
+  /\/\/.*$/
+;
