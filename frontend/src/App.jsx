@@ -9,9 +9,189 @@ function App() {
   const [output, setOutput] = useState("");
   const [showHowItWorks, setShowHowItWorks] = useState(true);
   const [showDictionary, setShowDictionary] = useState(false);
+  const [activeLyric, setActiveLyric] = useState(null);
+
+  const lyricAudioMap = [
+    {
+      match: "Song: Baby",
+      audio: "/audio/intro.mp3",
+    },
+    {
+      match: "Oh, woah",
+      audio: "/audio/ohwoah.mp3",
+    },
+    {
+      match: "Just shout",
+      audio: "/audio/justshout.mp3",
+    },
+    {
+      match: "and I'll be there",
+      audio: "/audio/andillbethere.mp3",
+    },
+    {
+      match: "And i was like",
+      audio: "/audio/andiwaslike.mp3",
+    },
+    {
+      match: "baby, ohh",
+      audio: "/audio/babyohh.mp3",
+    },
+    {
+      match: "baby,",
+      audio: "/audio/baby.mp3",
+    },
+    {
+      match: "Are we",
+      audio: "/audio/arewe.mp3",
+    },
+    {
+      match: "Girl quit playin, we're",
+      audio: "/audio/girlquitplayin.mp3",
+    },
+    {
+      match: "what are you sayin?",
+      audio: "/audio/whatareyousayin.mp3",
+    },
+    {
+      match: "Said, Theres another, and looked right in my eyes",
+      audio: "/audio/saidtheresanother.mp3",
+    },
+    {
+      match: "My first love broke my heart for the first time",
+      audio: "/audio/myfirstlove.mp3",
+    },
+    {
+      match: "When i",
+      audio: "/audio/wheniwas.mp3",
+    },
+    {
+      match: "I had my first love",
+      audio: "/audio/ihadmyfirstlove.mp3",
+    },
+    {
+      match: "And now my heart is breaking, but I just keep on saying",
+      audio: "/audio/andnowmyheartisbreaking.mp3",
+    },
+    {
+      match: "I thought you'd always be mine, mine",
+      audio: "/audio/thoughtyoudalways.mp3",
+    },
+  ];
+
+  const sortedLyricAudioMap = [...lyricAudioMap].sort(
+    (a, b) => normalizeLyric(b.match).length - normalizeLyric(a.match).length
+  );
+
+  function speakText(text) {
+    return new Promise((resolve) => {
+      if (!("speechSynthesis" in window)) {
+        resolve();
+        return;
+      }
+
+      const synth = window.speechSynthesis;
+
+      const speak = () => {
+        synth.cancel();
+
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.rate = 1;
+        utterance.pitch = 1;
+        utterance.volume = 1;
+
+        utterance.onend = resolve;
+        utterance.onerror = resolve;
+
+        synth.speak(utterance);
+      };
+
+      // Wait for voices if not loaded yet
+      if (synth.getVoices().length === 0) {
+        synth.onvoiceschanged = speak;
+      } else {
+        speak();
+      }
+
+      setTimeout(resolve, Math.max(1500, text.length * 80));
+    });
+  }
+
+  function normalizeLyric(text) {
+    return text
+      .toLowerCase()
+      .trim()
+      .replace(/[’‘]/g, "'")
+      .replace(/[“”]/g, '"')
+      .replace(/["']/g, "")
+      .replace(/\s+/g, " ");
+  }
+
+  async function playLyricAudio(inputCode) {
+    const lines = inputCode.split("\n");
+
+    for (const line of lines) {
+      let remaining = line.trim();
+
+      while (remaining.length > 0) {
+        const normalizedRemaining = normalizeLyric(remaining);
+
+        const match = lyricAudioMap.find((item) =>
+          normalizedRemaining.startsWith(normalizeLyric(item.match))
+        );
+
+        if (match) {
+          setActiveLyric(match.match);
+          await playAudioClip(match.audio);
+          setActiveLyric(null);
+
+          remaining = remaining.slice(match.match.length).trim();
+        } else {
+          const nextMatchIndex = lyricAudioMap
+            .map((item) =>
+              normalizedRemaining.indexOf(normalizeLyric(item.match))
+            )
+            .filter((index) => index > 0)
+            .sort((a, b) => a - b)[0];
+
+          const speechChunk =
+            nextMatchIndex === undefined
+              ? remaining
+              : remaining.slice(0, nextMatchIndex);
+
+          setActiveLyric(speechChunk);
+          await speakText(speechChunk);
+          setActiveLyric(null);
+
+          remaining = remaining.slice(speechChunk.length).trim();
+        }
+      }
+    }
+  }
+
+  function playAudioClip(src) {
+    return new Promise((resolve) => {
+      const audio = new Audio(src);
+
+      const cleanup = () => {
+        audio.onended = null;
+        audio.onerror = null;
+        clearTimeout(timeout);
+        resolve();
+      };
+
+      audio.onended = cleanup;
+      audio.onerror = cleanup;
+
+      const timeout = setTimeout(cleanup, 4000); // fallback if clip gets stuck
+
+      audio.play().catch(cleanup);
+    });
+  }
 
   async function runCode() {
     setOutput("Running...");
+
+    playLyricAudio(code);
 
     try {
       const response = await fetch(`${import.meta.env.VITE_API_URL}/run`, {
