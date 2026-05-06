@@ -35,7 +35,7 @@ class Bieber:
 
         elif cls_name == "BabyDecrement":
             count = self.count_downs(stmt.downCount)
-            self.variables["i"] = self.variables.get("i", 0) - count
+            self.variables[stmt.variable] = self.variables.get(stmt.variable, 0) - count
 
         elif cls_name == "BabyLoop":
             condition = self.eval_condition(stmt.condition)
@@ -48,7 +48,7 @@ class Bieber:
             self.execute_if(stmt)
 
         elif cls_name == "BabyExpr":
-            self.eval_expr(stmt.expr)
+            self.variables[stmt.variable] = self.eval_expr(stmt.expr)
 
         elif cls_name == "BabyCall":
             method = stmt.name

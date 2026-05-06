@@ -50,11 +50,11 @@ BabyCount:
 ;
 
 BabyDecrement:
-  'Im going' downCount=DownCount 
+  variable=ID 'going' downCount=DownCount '~'
 ;
 
 DownCount:
-  'down' | 'down,' downCount=DownCount
+  'down,' downCount=DownCount | 'down' 
 ;
 
 BabyLoop:
@@ -98,7 +98,7 @@ ConditionOp:
 ;
 
 BabyExpr:
-  "Oh, for you, I would've done" expr=Expr
+  "Oh, for" variable=ID ", I would've done" expr=Expr '~'
 ;
 
 Expr:

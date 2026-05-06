@@ -61,6 +61,26 @@ function App() {
       audio: "/audio/myfirstlove.mp3",
     },
     {
+      match: "Oh, for",
+      audio: "/audio/ohfor.mp3",
+    },
+    {
+      match: "I would've done",
+      audio: "/audio/iwouldvedone.mp3",
+    },
+    {
+      match: "going down",
+      audio: "/audio/goingdown.mp3",
+    },
+    {
+      match: "down,",
+      audio: "/audio/down.mp3",
+    },
+    {
+      match: "down",
+      audio: "/audio/lowdown.mp3",
+    },
+    {
       match: "When i",
       audio: "/audio/wheniwas.mp3",
     },
@@ -418,7 +438,7 @@ function App() {
               <strong>Decrement</strong>
             </p>
             <div className="rounded-2xl bg-purple-50 p-4 font-mono text-sm text-slate-700">
-              Im going down, down
+              x going down, down ~
             </div>
             <p className="mb-4 text-slate-700">
               - Decreases a variable by the number of times "down" appears <br/>
@@ -483,10 +503,10 @@ function App() {
               <strong>Expressions</strong>
             </p>
             <div className="rounded-2xl bg-purple-50 p-4 font-mono text-sm text-slate-700">
-              Oh, for you, I would've done a + b
+              Oh, for x, I would've done a + b ~
             </div>
             <p className="mb-4 text-slate-700">
-              - Evaluates a value or operation <br/>
+              - Evaluates a value or operation and assigns it to a value <br/>
               - Supports + - * / %
             </p>
 
